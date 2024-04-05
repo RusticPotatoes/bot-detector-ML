@@ -10,8 +10,9 @@ load_dotenv(find_dotenv(), verbose=True)
 
 # get env variables
 token = os.environ.get("token")
-detector_api = os.environ.get("api")
+detector_api = os.environ.get("detector_api")
 secret_token = os.environ.get("secret_token")
+private_api = os.environ.get("private_api")
 
 app = FastAPI()
 

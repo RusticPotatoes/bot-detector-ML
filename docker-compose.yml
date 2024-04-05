@@ -37,6 +37,35 @@ services:
       - botdetector-network
     depends_on:
       - mysql
+
+  private_api:
+    container_name: private_api
+    build:
+      context: ../private-api
+      dockerfile: Dockerfile
+      target: base
+      args:
+        root_path: /
+        api_port: 5000
+    # command: bash -c "apt update && apt install -y curl && sleep infinity"
+    command: uvicorn src.core.server:app --host 0.0.0.0 --reload --reload-include src/*
+    ports:
+      - 5001:5000
+    networks:
+      - botdetector-network
+    # this overrides the env_file for the specific variable
+    environment:
+      - KAFKA_HOST=kafka:9092
+      - DATABASE_URL=mysql+aiomysql://root:root_bot_buster@mysql:3306/playerdata
+      - ENV=DEV
+      - POOL_RECYCLE=60
+      - POOL_TIMEOUT=30
+    volumes:
+      - ./src:/project/src
+    depends_on:
+      - mysql
+      # - mysql_setup
+
   machine-learning:
     build:
       context: .
@@ -57,6 +86,7 @@ services:
       - botdetector-network
     depends_on:
       - api
+      - private_api
 
 networks:
   botdetector-network:

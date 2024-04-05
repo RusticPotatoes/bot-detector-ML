@@ -1,7 +1,8 @@
-import logging
-import api.config as config
-import aiohttp
 import asyncio
+import logging
+
+import aiohttp
+import api.config as config
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +60,7 @@ async def retry_request(url: str, params: dict) -> list[dict]:
 # Define an asynchronous function to get labels from an API
 async def get_labels():
     # Construct the URL and parameters for the request
-    url = f"{config.detector_api}/v1/label"
+    url = f"{config.detector_api}/label"
     params = {
         "token": config.token,
     }
@@ -70,7 +71,7 @@ async def get_labels():
 
 
 async def get_player_data(label_id: int, limit: int = 5000):
-    url = "http://private-api-svc.bd-prd.svc:5000/v2/player"
+    url = f"{config.private_api}/player"
 
     params = {
         "player_id": 1,
@@ -100,7 +101,7 @@ async def get_player_data(label_id: int, limit: int = 5000):
 
 
 async def get_hiscore_data(label_id: int, limit: int = 5000):
-    url = "http://private-api-svc.bd-prd.svc:5000/v2/highscore/latest"  # TODO: fix hardcoded
+    url = f"{config.private_api}/highscore/latest"
     params = {"player_id": 1, "label_id": label_id, "many": 1, "limit": limit}
 
     # Initialize a list to store hiscore data
@@ -124,7 +125,7 @@ async def get_hiscore_data(label_id: int, limit: int = 5000):
 
 
 async def get_prediction_data(player_id: int = 0, limit: int = 0):
-    url = "http://private-api-svc.bd-prd.svc:5000/v2/highscore/latest"  # TODO: fix hardcoded
+    url = f"{config.private_api}/highscore/latest"
     params = {"player_id": player_id, "many": 1, "limit": limit}
 
     data = await retry_request(url=url, params=params)
@@ -132,7 +133,7 @@ async def get_prediction_data(player_id: int = 0, limit: int = 0):
 
 
 async def post_prediction(data: list[dict]):
-    url = f"{config.detector_api}/v1/prediction"
+    url = f"{config.detector_api}/prediction"
     params = {"token": config.token}
 
     while True:
