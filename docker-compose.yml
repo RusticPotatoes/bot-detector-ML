@@ -16,6 +16,22 @@ services:
       - "3306:3306"
     networks:
       - botdetector-network
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  mysql_setup:
+    container_name: mysql_setup
+    image: bot-detector/mysql_setup
+    build:
+      context: ../private-api/mysql_setup
+    command: ["python", "-u","setup_mysql.py"]
+    networks:
+      - botdetector-network
+    depends_on:
+      mysql:
+        condition: service_healthy
 
   api:
     build:
@@ -46,11 +62,11 @@ services:
       target: base
       args:
         root_path: /
-        api_port: 5000
+        api_port: 5001
     # command: bash -c "apt update && apt install -y curl && sleep infinity"
     command: uvicorn src.core.server:app --host 0.0.0.0 --reload --reload-include src/*
     ports:
-      - 5001:5000
+      - 5001:5001
     networks:
       - botdetector-network
     # this overrides the env_file for the specific variable
@@ -66,7 +82,7 @@ services:
       - mysql
       # - mysql_setup
 
-  machine-learning:
+  machine_learning:
     build:
       context: .
       dockerfile: Dockerfile
