@@ -17,9 +17,11 @@ services:
     networks:
       - botdetector-network
     healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-      timeout: 20s
-      retries: 10
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -proot_bot_buster"]
+      interval: 10s
+      retries: 3
+      start_period: 30s
+      timeout: 5s
 
   mysql_setup:
     container_name: mysql_setup
@@ -63,7 +65,6 @@ services:
       args:
         root_path: /
         api_port: 5001
-    # command: bash -c "apt update && apt install -y curl && sleep infinity"
     command: uvicorn src.core.server:app --host 0.0.0.0 --reload --reload-include src/*
     ports:
       - 5001:5001
@@ -77,10 +78,9 @@ services:
       - POOL_RECYCLE=60
       - POOL_TIMEOUT=30
     volumes:
-      - ./src:/project/src
+      - ../private-api/src:/project/src
     depends_on:
       - mysql
-      # - mysql_setup
 
   machine_learning:
     build:
