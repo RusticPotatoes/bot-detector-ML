@@ -442,3 +442,10 @@ CREATE TABLE player_activities (
   FOREIGN KEY (activity_id) REFERENCES activities(activity_id) ON DELETE CASCADE,
   PRIMARY KEY (scraper_id, activity_id)
 );
+
+CREATE TABLE Labels (
+  id INT NOT NULL AUTO_INCREMENT,
+  label VARCHAR(50) NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE INDEX Unique_label USING BTREE (label) VISIBLE
+);
