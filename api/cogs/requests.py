@@ -71,7 +71,7 @@ async def get_labels():
 
 
 async def get_player_data(label_id: int, limit: int = 5000):
-    url = f"{config.private_api}/player"
+    url = f"{config.private_api}/v2/player"
 
     params = {
         "player_id": 1,
@@ -101,7 +101,7 @@ async def get_player_data(label_id: int, limit: int = 5000):
 
 
 async def get_hiscore_data(label_id: int, limit: int = 5000):
-    url = f"{config.private_api}/highscore/latest"
+    url = f"{config.private_api}/v3/highscore/latest"
     params = {"player_id": 1, "label_id": label_id, "many": 1, "limit": limit}
 
     # Initialize a list to store hiscore data
@@ -125,7 +125,7 @@ async def get_hiscore_data(label_id: int, limit: int = 5000):
 
 
 async def get_prediction_data(player_id: int = 0, limit: int = 0):
-    url = f"{config.private_api}/highscore/latest"
+    url = f"{config.private_api}/v3/highscore/latest"
     params = {"player_id": player_id, "many": 1, "limit": limit}
 
     data = await retry_request(url=url, params=params)
