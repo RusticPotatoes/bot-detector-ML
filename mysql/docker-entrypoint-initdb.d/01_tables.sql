@@ -449,3 +449,71 @@ CREATE TABLE Labels (
   PRIMARY KEY (id),
   UNIQUE INDEX Unique_label USING BTREE (label) VISIBLE
 );
+
+-- -----------------------------------------------------
+-- Table `playerdata`.`apiPermissions`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `playerdata`.`apiPermissions` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `permission` TEXT NOT NULL,
+  PRIMARY KEY (`id`)
+)
+;
+
+
+-- -----------------------------------------------------
+-- Table `playerdata`.`apiUser`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `playerdata`.`apiUser` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `username` TINYTEXT NOT NULL,
+  `token` TINYTEXT NOT NULL,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `last_used` DATETIME NULL DEFAULT NULL,
+  `ratelimit` INT NOT NULL DEFAULT '100',
+  `is_active` TINYINT(1) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id`),
+  INDEX `idx_token` (`token`(15) ASC) VISIBLE
+)
+;
+
+
+-- -----------------------------------------------------
+-- Table `playerdata`.`apiUsage`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `playerdata`.`apiUsage` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `user_id` INT NOT NULL,
+  `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `route` TEXT NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `FK_apiUsage_apiUser` (`user_id` ASC) VISIBLE,
+  CONSTRAINT `FK_apiUsage_apiUser`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `playerdata`.`apiUser` (`id`)
+    ON DELETE RESTRICT
+    ON UPDATE RESTRICT
+);
+
+
+-- -----------------------------------------------------
+-- Table `playerdata`.`apiUserPerms`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `playerdata`.`apiUserPerms` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `user_id` INT NOT NULL,
+  `permission_id` INT NOT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `FK_apiUserPerms_apiUser` (`user_id` ASC) VISIBLE,
+  INDEX `FK_apiUserPerms_apiPermission` (`permission_id` ASC) VISIBLE,
+  CONSTRAINT `FK_apiUserPerms_apiPermission`
+    FOREIGN KEY (`permission_id`)
+    REFERENCES `playerdata`.`apiPermissions` (`id`)
+    ON DELETE RESTRICT
+    ON UPDATE RESTRICT,
+  CONSTRAINT `FK_apiUserPerms_apiUser`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `playerdata`.`apiUser` (`id`)
+    ON DELETE RESTRICT
+    ON UPDATE RESTRICT
+);
