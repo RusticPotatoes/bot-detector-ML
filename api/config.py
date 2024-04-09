@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import sys
@@ -9,32 +10,47 @@ from fastapi import FastAPI
 load_dotenv(find_dotenv(), verbose=True)
 
 # get env variables
+# TODO: convert to pydantid_settings
 token = os.environ.get("token")
-detector_api = os.environ.get("api")
+detector_api = os.environ.get("detector_api")
 secret_token = os.environ.get("secret_token")
+private_api = os.environ.get("private_api")
 
+assert token is not None
+assert detector_api is not None
+assert secret_token is not None
+assert private_api is not None
+
+# TODO: move to app.py // rename that to server.py
 app = FastAPI()
 
+# TODO: move to logging_config.py
 # setup logging
-logger = logging.getLogger()
-file_handler = logging.FileHandler(filename="error.log", mode="a")
+formatter = logging.Formatter(
+    json.dumps(
+        {
+            "ts": "%(asctime)s",
+            "name": "%(name)s",
+            "function": "%(funcName)s",
+            "level": "%(levelname)s",
+            "msg": json.dumps("%(message)s"),
+        }
+    )
+)
+
 stream_handler = logging.StreamHandler(sys.stdout)
 
-logging.basicConfig(filename="error.log", level=logging.DEBUG)
-
-# log formatting
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-file_handler.setFormatter(formatter)
 stream_handler.setFormatter(formatter)
 
-# add handler
-logger.addHandler(file_handler)
-logger.addHandler(stream_handler)
+handlers = [stream_handler]
 
-logging.getLogger("requests").setLevel(logging.DEBUG)
-logging.getLogger("urllib3").setLevel(logging.WARNING)
-logging.getLogger("uvicorn").setLevel(logging.DEBUG)
-logging.getLogger("uvicorn.error").propagate = False
+logging.basicConfig(level=logging.DEBUG, handlers=handlers)
+
+
+# logging.getLogger("requests").setLevel(logging.DEBUG)
+# logging.getLogger("urllib3").setLevel(logging.WARNING)
+# logging.getLogger("uvicorn").setLevel(logging.DEBUG)
+# logging.getLogger("uvicorn.error").propagate = False
 
 BATCH_AMOUNT = 5_000
 

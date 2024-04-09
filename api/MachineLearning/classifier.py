@@ -6,16 +6,21 @@ import joblib
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import (balanced_accuracy_score, classification_report,
-                             roc_auc_score)
+from sklearn.metrics import (
+    balanced_accuracy_score,
+    classification_report,
+    roc_auc_score,
+)
 
 logger = logging.getLogger(__name__)
+
 
 class classifier(RandomForestClassifier):
     """
     This class is a wrapper for RandomForestClassifier.
     It adds the ability to save and load the model.
     """
+
     working_directory = os.path.dirname(os.path.realpath(__file__))
     path = os.path.join(working_directory, "models")
     if not os.path.exists(path):
@@ -56,7 +61,6 @@ class classifier(RandomForestClassifier):
                 # add dict to array
                 files.append(d)
 
-
         if not files:
             return None
 
@@ -95,7 +99,6 @@ class classifier(RandomForestClassifier):
             f"{self.path}/{self.name}_{today}_{round(self.accuracy, 2)}.joblib",
             compress=3,
         )
-
 
     def score(self, test_y, test_x):
         """

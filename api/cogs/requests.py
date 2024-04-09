@@ -1,7 +1,9 @@
-import logging
-import api.config as config
-import aiohttp
 import asyncio
+import logging
+
+import aiohttp
+
+import api.config as config
 
 logger = logging.getLogger(__name__)
 
@@ -13,17 +15,14 @@ async def make_request(url: str, params: dict, headers: dict = {}) -> list[dict]
     _secure_params["token"] = "***"
 
     # Log the URL and secure parameters for debugging
-    logger.info({"url": url.split("/v")[-1], "params": _secure_params})
+    logger.info({"url": f"v{url.split('/v')[-1]}", "params": _secure_params})
 
     # Use aiohttp to make an asynchronous GET request
     async with aiohttp.ClientSession() as session:
         async with session.get(url=url, params=params, headers=headers) as resp:
             # Check if the response status is OK (200)
             if not resp.ok:
-                error_message = (
-                    f"response status {resp.status} "
-                    f"response body: {await resp.text()}"
-                )
+                error_message = {"status": resp.status, "body": await resp.text()}
                 # Log the error message and raise a ValueError
                 logger.error(error_message)
                 raise ValueError(error_message)
@@ -52,8 +51,8 @@ async def retry_request(url: str, params: dict) -> list[dict]:
             _secure_params = params.copy()
             _secure_params["token"] = "***"
             logger.error({"url": url, "params": _secure_params, "error": str(e)})
-            await asyncio.sleep(15)
-            retry += 1
+        await asyncio.sleep(15)
+        retry += 1
 
 
 # Define an asynchronous function to get labels from an API
@@ -70,7 +69,7 @@ async def get_labels():
 
 
 async def get_player_data(label_id: int, limit: int = 5000):
-    url = "http://private-api-svc.bd-prd.svc:5000/v2/player"
+    url = f"{config.private_api}/v2/player"
 
     params = {
         "player_id": 1,
@@ -100,7 +99,7 @@ async def get_player_data(label_id: int, limit: int = 5000):
 
 
 async def get_hiscore_data(label_id: int, limit: int = 5000):
-    url = "http://private-api-svc.bd-prd.svc:5000/v2/highscore/latest"  # TODO: fix hardcoded
+    url = f"{config.private_api}/v2/highscore/latest"
     params = {"player_id": 1, "label_id": label_id, "many": 1, "limit": limit}
 
     # Initialize a list to store hiscore data
@@ -124,7 +123,7 @@ async def get_hiscore_data(label_id: int, limit: int = 5000):
 
 
 async def get_prediction_data(player_id: int = 0, limit: int = 0):
-    url = "http://private-api-svc.bd-prd.svc:5000/v2/highscore/latest"  # TODO: fix hardcoded
+    url = f"{config.private_api}/v2/highscore/latest"
     params = {"player_id": player_id, "many": 1, "limit": limit}
 
     data = await retry_request(url=url, params=params)
@@ -132,7 +131,7 @@ async def get_prediction_data(player_id: int = 0, limit: int = 0):
 
 
 async def post_prediction(data: list[dict]):
-    url = f"{config.detector_api}/v1/prediction"
+    url = f"{config.detector_api}/prediction"
     params = {"token": config.token}
 
     while True:
