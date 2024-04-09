@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from datetime import date
 from typing import List
 
 import pandas as pd
@@ -11,7 +12,6 @@ from api import config
 from api.cogs import predict
 from api.cogs import requests as req
 from api.MachineLearning import classifier, data
-from datetime import date
 
 app = config.app
 
@@ -47,7 +47,7 @@ async def root():
     """
     This endpoint is used to check if the api is running.
     """
-    return {"detail": "hello worldz"}
+    return {"detail": "hello world"}
 
 
 @app.get("/startup")

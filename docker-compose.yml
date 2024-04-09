@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   mysql:
     container_name: database
@@ -47,7 +46,8 @@ services:
     networks:
       - botdetector-network
     depends_on:
-      - mysql
+      mysql_setup:
+        condition: service_completed_successfully
 
   private_api:
     image: quay.io/bot_detector/private-api:4d70b82
@@ -67,7 +67,8 @@ services:
       - POOL_RECYCLE=60
       - POOL_TIMEOUT=30
     depends_on:
-      - mysql
+      mysql_setup:
+        condition: service_completed_successfully
 
   machine_learning:
     container_name: bd-ml
@@ -80,14 +81,14 @@ services:
         api_port: 8000
     command: uvicorn api.app:app --host 0.0.0.0 --reload --reload-include api/*
     environment:
-      - token = verify_ban
-      - secret_token = super_secret_token
-      - private_api = private_api:5000
-      - detector_api = core_api:5000
+      - token=verify_ban
+      - secret_token=super_secret_token
+      - private_api=http://private_api:5000
+      - detector_api=http://core_api:5000
     volumes:
       - ./api:/project/api
     ports:
-      - 8000:8000
+      - 5003:8000
     networks:
       - botdetector-network
     depends_on:

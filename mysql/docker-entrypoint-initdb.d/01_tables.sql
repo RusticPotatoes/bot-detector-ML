@@ -450,10 +450,37 @@ CREATE TABLE Labels (
   UNIQUE INDEX Unique_label USING BTREE (label) VISIBLE
 );
 
+DELIMITER //
+
+CREATE TRIGGER `sd_latest` AFTER INSERT ON `scraper_data` FOR EACH ROW
+BEGIN
+    DECLARE latest_created_at DATETIME;
+
+    -- Get the latest created_at from scraper_data_latest for the current player_id
+    SELECT created_at INTO latest_created_at
+    FROM scraper_data_latest
+    WHERE player_id = NEW.player_id;
+
+    IF latest_created_at IS NULL THEN
+        INSERT INTO scraper_data_latest (scraper_id, created_at, player_id)
+        VALUES (NEW.scraper_id, NEW.created_at, NEW.player_id)
+        ON DUPLICATE KEY UPDATE
+            scraper_id = NEW.scraper_id,
+            created_at = NEW.created_at;
+    ELSEIF NEW.created_at > latest_created_at THEN
+        UPDATE scraper_data_latest
+        SET
+            scraper_id = NEW.scraper_id,
+            created_at = NEW.created_at
+        WHERE player_id = NEW.player_id;
+    END IF;
+END //
+
+DELIMITER ;
 -- -----------------------------------------------------
 -- Table `playerdata`.`apiPermissions`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `playerdata`.`apiPermissions` (
+CREATE TABLE `playerdata`.`apiPermissions` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `permission` TEXT NOT NULL,
   PRIMARY KEY (`id`)
@@ -464,7 +491,7 @@ CREATE TABLE IF NOT EXISTS `playerdata`.`apiPermissions` (
 -- -----------------------------------------------------
 -- Table `playerdata`.`apiUser`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `playerdata`.`apiUser` (
+CREATE TABLE `playerdata`.`apiUser` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `username` TINYTEXT NOT NULL,
   `token` TINYTEXT NOT NULL,
@@ -481,7 +508,7 @@ CREATE TABLE IF NOT EXISTS `playerdata`.`apiUser` (
 -- -----------------------------------------------------
 -- Table `playerdata`.`apiUsage`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `playerdata`.`apiUsage` (
+CREATE TABLE `playerdata`.`apiUsage` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
   `user_id` INT NOT NULL,
   `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -499,7 +526,7 @@ CREATE TABLE IF NOT EXISTS `playerdata`.`apiUsage` (
 -- -----------------------------------------------------
 -- Table `playerdata`.`apiUserPerms`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `playerdata`.`apiUserPerms` (
+CREATE TABLE `playerdata`.`apiUserPerms` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `user_id` INT NOT NULL,
   `permission_id` INT NOT NULL,

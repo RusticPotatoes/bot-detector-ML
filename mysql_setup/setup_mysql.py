@@ -121,7 +121,7 @@ def random_date():
 
 
 class Labels(Base):
-    __tablename__ = "labels"
+    __tablename__ = "Labels"
 
     id = Column(Integer, primary_key=True)
     label = Column(String)
@@ -142,8 +142,8 @@ label_ids = session.query(Labels.id).all()
 label_ids = [id[0] for id in label_ids]  # Convert list of tuples to list of ids
 
 # Insert data into Players table
-len_players = 250
-for i in range(250):
+len_players = 500
+for i in range(len_players):
     print(f"Player_{i}")
     # Check if the player already exists
     existing_player = session.query(Players).filter_by(name=f"Player_{i}").first()
