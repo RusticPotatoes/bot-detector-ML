@@ -50,7 +50,7 @@ services:
         condition: service_completed_successfully
 
   private_api:
-    image: quay.io/bot_detector/private-api:4d70b82
+    image: quay.io/bot_detector/private-api:e96c31a
     command: uvicorn src.core.server:app --host 0.0.0.0 --reload --reload-include src/*
     # Ports exposed to the other services but not to the host machine
     expose: 
