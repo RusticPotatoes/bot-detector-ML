@@ -131,7 +131,7 @@ async def get_prediction_data(player_id: int = 0, limit: int = 0):
 
 
 async def post_prediction(data: list[dict]):
-    url = f"{config.detector_api}/prediction"
+    url = f"{config.detector_api}/v1/prediction"
     params = {"token": config.token}
 
     while True:
